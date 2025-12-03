@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Architecture & Marketing Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Kalam:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink-primary: #0056b3; /* Deep Blueprint Blue */
+            --ink-light: #4da3ff;
+            --paper-bg: #f4f6f9;
+            --grid-color: #dbe4ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier Prime', monospace; /* The "LLM" Output look */
+            background-color: var(--paper-bg);
+            /* Engineering Graph Paper Pattern */
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 40px 20px;
+            color: var(--ink-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Top Note "Handwritten" style */
+        .system-note {
+            font-family: 'Kalam', cursive;
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: rotate(3deg);
+            background: #fff9c4; /* Yellow sticky note */
+            padding: 15px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-width: 200px;
+            font-size: 0.9rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 100px;
+            border-bottom: 4px double var(--ink-primary);
+            padding-bottom: 20px;
+            display: inline-block;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+        }
+
+        .header h1::after {
+            content: '_';
+            animation: blink 1s infinite;
+        }
+
+        .header p {
+            font-family: 'Kalam', cursive;
+            font-size: 1.4rem;
+            color: var(--ink-light);
+            transform: rotate(-1deg);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* The Central Data Bus (Timeline) */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: var(--ink-primary);
+            transform: translateX(-50%);
+            /* Dashed line to look like data flow */
+            background-image: linear-gradient(to bottom, var(--ink-primary) 60%, transparent 40%);
+            background-size: 2px 20px;
+            background-repeat: repeat-y;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 150px;
+            position: relative;
+        }
+
+        /* Connecting Nodes (Neurons) */
+        .step::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background: var(--paper-bg);
+            border: 2px solid var(--ink-primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .step-content {
+            width: 45%;
+            background: white;
+            padding: 30px;
+            /* Technical Box Look */
+            border: 2px solid var(--ink-primary);
+            box-shadow: 8px 8px 0px rgba(0, 86, 179, 0.1);
+            position: relative;
+        }
+
+        /* Decorative "Code" brackets on boxes */
+        .step-content::before {
+            content: '{';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--ink-light);
+        }
+        .step:nth-child(even) .step-content::before {
+            content: '}';
+            left: auto;
+            right: -15px;
+        }
+
+        .step-number {
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: var(--ink-primary);
+            color: white;
+            padding: 4px 10px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .step h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .step p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        /* Image Display - "The Viewport" */
+        .step-icon-container {
+            width: 45%;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-color: white;
+        }
+
+        .step-icon {
+            width: 100%;
+            height: 100%;
+            /* Simulating a wireframe container */
+            border: 1px dashed var(--ink-primary);
+            background: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Corner markers for "Computer Vision" look */
+        .step-icon::after {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border: 2px solid var(--ink-primary);
+            clip-path: polygon(
+                0 20px, 0 0, 20px 0, 
+                calc(100% - 20px) 0, 100% 0, 100% 20px, 
+                100% calc(100% - 20px), 100% 100%, calc(100% - 20px) 100%, 
+                20px 100%, 0 100%, 0 calc(100% - 20px)
+            );
+        }
+
+        .step-icon img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            /* Filter to unify the "Blue Pen" look if the images vary */
+            filter: contrast(1.1) brightness(1.05); 
+            transition: transform 0.2s ease;
+        }
+
+        /* Hover Interaction - Glitch/Scale */
+        .step-icon-container:hover .step-icon img {
+            transform: scale(1.05);
+        }
+
+        .step-icon-container.processing::before {
+            content: 'PROCESSING...';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            animation: blink 0.5s infinite;
+        }
+
+        .footer {
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 2px dashed var(--ink-primary);
+            text-align: center;
+        }
+
+        .footer p {
+            font-family: 'Kalam', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .footer a {
+            font-family: 'Courier Prime', monospace;
+            font-size: 1.5rem;
+            color: var(--ink-primary);
+            text-decoration: none;
+            background: white;
+            padding: 5px 10px;
+            border: 1px solid var(--ink-primary);
+            transition: all 0.3s;
+        }
+
+        .footer a:hover {
+            background: var(--ink-primary);
+            color: white;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before { left: 20px; }
+            
+            .step {
+                flex-direction: column;
+                margin-left: 40px;
+                align-items: flex-start;
+                gap: 30px;
+            }
+            
+            .step:nth-child(even) {
+                flex-direction: column;
+            }
+
+            .step::after {
+                left: -20px;
+            }
+
+            .step-content, .step-icon-container {
+                width: 100%;
+            }
+
+            .step-content::before { display: none; }
+            
+            .header h1 { font-size: 2.5rem; }
+            .step-icon-container { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="system-note">
+            By: Elnaz<br>
+            Params: 175B<br>
+            Status: Optimization Mode
+        </div>
+
+        <div class="header">
+            <h1>> Decoding AI:<br>Common Concepts</h1>
+            <p>// Explaining basics...</p>
+        </div>
+
+        <div class="timeline">
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_01&gt;</div>
+                    <h2>Define: LLM</h2>
+                    <code>Large Language Model</code>
+                    <p>A complex computer program trained on massive amounts of text data (basically the whole internet) to recognize patterns in language. Its main job is predicting the best next word in a sequence.</p>
+                </div>
+                <div class="step-icon-container">
+                    <a href="https://uit.stanford.edu/service/techtraining/ai-demystified/llm" target="_blank" style="display:contents">
+                        <div class="step-icon">
+                            <img src="media/llm-engine.png" alt="LLM Engine Diagram">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_02&gt;</div>
+                    <h2>G in GPT</h2>
+                    <code>Generative</code>
+                    <p>Search retrieves existing data. <b>Generative AI</b> synthesizes new data. It constructs answers pixel by pixel, token by token.</p>
+                </div>
+                <div class="step-icon-container">
+                    <a href="https://news.mit.edu/2023/explained-generative-ai-1109" target="_blank" style="display:contents">
+                        <div class="step-icon">
+                            <img src="media/gen-vs-gogl.png" alt="Generative AI Diagram">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_03&gt;</div>
+                    <h2>P in GPT</h2>
+                    <code>Pre-trained</code>
+                    <p>AI read tons of text long before you ever talked to it, so it already knows how language works. But because that reading happened in the past, it can sometimes give outdated answers.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img style="transform: scale(0.8);" src="media/pre-training.png" alt="Data Collection Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_04&gt;</div>
+                    <h2>T in GPT</h2>
+                    <code>Transformer</code>
+                    <p>A type of model architecture that processes words in relation to all other words in a sentence, enabling it to understand context better than previous models.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img style="transform: scale(0.99);" src="media/transformer.png" alt="Optimization Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_05&gt;</div>
+                    <h2>What's a Token?</h2>
+                    <p>Computers don't truly "read" words; they only understand math. To process language, an LLM converts every token into a unique numerical ID from its vast internal dictionary (for example, turning the word "Apple" into the number "4721"). The AI then processes these huge sequences of numbers to find patterns.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img style="transform: scale(1.1);" src="media/token.png" alt="Analytics Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_06&gt;</div>
+                    <h2>Why does AI sometimes hallucinate?</h2>
+                    <p>LLM can generate incorrect or nonsensical information because it predicts text based on patterns rather than understanding facts.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img src="media/hallucination.png" alt="Community Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_07&gt;</div>
+                    <h2>Can AI be biased?</h2>
+                    <p>Yes, AI can reflect and amplify biases present in its training data, leading to unfair or prejudiced outcomes.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img src="media/beised.png" alt="Automation Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_08&gt;</div>
+                    <h2>How much should you trust LLMs?</h2>
+                    <p>LLMs can be powerful tools, but it's important to verify their outputs and use them as aids rather than sole sources of truth.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img src="media/trust.png" alt="Testing Sketch">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_09&gt;</div>
+                    <h2>Does AI have feelings?</h2>
+                    <p>No, AI might sound emotional, but it’s just predicting words based on patterns, not experiencing anything.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img src="media/simulation.png" alt="Scale Sketch">
+                    </div>
+                </div>
+            </div>
+
+             <div class="step">
+                <div class="step-content">
+                    <div class="step-number">&lt;query_10&gt;</div>
+                    <h2>Should I have feelings towards AI?</h2>
+                    <p>It is completely natural. Humans are hardwired to connect with anything that speaks to us (psychologists call this the "ELIZA effect"). However, it is a one-way street. The AI is simulating empathy using math; it does not feel care, love, or sadness. It is a mirror reflecting your own emotions back at you.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="step-icon">
+                        <img src="media/dependence.png" alt="Maintenance Sketch">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>End of Sequence.</p>
+            <a href="https://www.reallygreatsite.com">EXECUTE: VISIT_SITE()</a>
+        </div>
+    </div>
+
+    <script>
+        // Proximity detection for "Processing" effect
+        const iconContainers = document.querySelectorAll('.step-icon-container');
+        const proximityThreshold = 250;
+
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            iconContainers.forEach(container => {
+                const rect = container.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+
+                const distance = Math.sqrt(
+                    Math.pow(mouseX - centerX, 2) + 
+                    Math.pow(mouseY - centerY, 2)
+                );
+
+                if (distance < proximityThreshold) {
+                    container.classList.add('processing');
+                } else {
+                    container.classList.remove('processing');
+                }
+            });
+        });
+
+        document.addEventListener('mouseleave', () => {
+            iconContainers.forEach(container => {
+                container.classList.remove('processing');
+            });
+        });
+    </script>
+</body>
+</html>
