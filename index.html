@@ -3,498 +3,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Architecture & Marketing Flow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Kalam:wght@300;400&display=swap" rel="stylesheet">
+    <title>LLM Architecture // decoded</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Kalam:wght@300;400&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ink-primary: #0056b3; /* Deep Blueprint Blue */
-            --ink-light: #4da3ff;
-            --paper-bg: #f4f6f9;
-            --grid-color: #dbe4ee;
+            --ink-primary: #004a99;
+            --ink-secondary: #0056b3;
+            --ink-accent: #ff3366; /* Error/Glitch color */
+            --paper-bg: #f0f4f8;
+            --grid-color: rgba(0, 74, 153, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --shadow-elevation: 0 10px 30px -10px rgba(0, 74, 153, 0.15);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Courier Prime', monospace; /* The "LLM" Output look */
+            font-family: 'Courier Prime', monospace;
             background-color: var(--paper-bg);
-            /* Engineering Graph Paper Pattern */
+            /* Refined Blueprint Grid */
             background-image: 
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 20px 20px;
-            padding: 40px 20px;
+            background-size: 25px 25px;
             color: var(--ink-primary);
-            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Reading Progress Bar (UX) */
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0; height: 4px;
+            background: var(--ink-primary);
+            width: 0%;
+            z-index: 9999;
+            transition: width 0.1s;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             position: relative;
+            padding: 60px 20px;
         }
 
-        /* Top Note "Handwritten" style */
+        /* --- Header Section --- */
         .system-note {
             font-family: 'Kalam', cursive;
             position: absolute;
-            top: 0;
-            right: 0;
-            transform: rotate(3deg);
-            background: #fff9c4; /* Yellow sticky note */
-            padding: 15px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            top: 20px; right: 20px;
+            transform: rotate(2deg);
+            background: #fff9c4;
+            padding: 1rem 1.5rem;
+            box-shadow: 4px 4px 15px rgba(0,0,0,0.1);
             z-index: 10;
-            max-width: 200px;
-            font-size: 0.9rem;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #e6db74;
+            transition: transform 0.3s ease;
         }
+        .system-note:hover { transform: rotate(0deg) scale(1.05); }
 
         .header {
-            text-align: left;
-            margin-bottom: 100px;
-            border-bottom: 4px double var(--ink-primary);
-            padding-bottom: 20px;
-            display: inline-block;
+            margin-bottom: 120px;
+            border-left: 6px solid var(--ink-primary);
+            padding-left: 30px;
+            position: relative;
         }
 
+        /* Typewriter Effect */
         .header h1 {
-            font-size: 3.5rem;
-            letter-spacing: -2px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            line-height: 1.1;
             margin-bottom: 10px;
-        }
-
-        .header h1::after {
-            content: '_';
-            animation: blink 1s infinite;
+            width: fit-content;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: .15em solid var(--ink-primary);
+            animation: 
+                typing 2.5s steps(30, end),
+                blink-caret .75s step-end infinite;
         }
 
         .header p {
             font-family: 'Kalam', cursive;
-            font-size: 1.4rem;
-            color: var(--ink-light);
-            transform: rotate(-1deg);
+            font-size: 1.5rem;
+            color: #668bb5;
+            margin-top: 10px;
         }
 
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+        /* --- Timeline & Layout --- */
+        .timeline { position: relative; padding: 20px 0; }
 
-        /* The Central Data Bus (Timeline) */
-        .timeline {
-            position: relative;
-            padding: 20px 0;
-        }
-
+        /* The Central Bus */
         .timeline::before {
             content: '';
             position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
+            top: 0; bottom: 0; left: 50%;
             width: 2px;
-            background: var(--ink-primary);
+            background: repeating-linear-gradient(to bottom, var(--ink-primary) 0, var(--ink-primary) 10px, transparent 10px, transparent 20px);
             transform: translateX(-50%);
-            /* Dashed line to look like data flow */
-            background-image: linear-gradient(to bottom, var(--ink-primary) 60%, transparent 40%);
-            background-size: 2px 20px;
-            background-repeat: repeat-y;
+            z-index: -1;
         }
 
         .step {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 150px;
-            position: relative;
+            margin-bottom: 120px;
+            opacity: 0; /* Hidden for scroll animation */
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        /* Connecting Nodes (Neurons) */
-        .step::after {
-            content: '';
+        .step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step:nth-child(even) { flex-direction: row-reverse; }
+
+        /* Central Node/Neuron */
+        .node-marker {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 20px;
-            height: 20px;
+            left: 50%; width: 24px; height: 24px;
             background: var(--paper-bg);
-            border: 2px solid var(--ink-primary);
+            border: 3px solid var(--ink-primary);
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 0 5px var(--paper-bg); /* Masking effect */
+            transition: background 0.3s;
         }
 
-        .step:nth-child(even) {
-            flex-direction: row-reverse;
-        }
+        .step:hover .node-marker { background: var(--ink-primary); }
 
+        /* --- Content Cards (Glassmorphism) --- */
         .step-content {
             width: 45%;
-            background: white;
-            padding: 30px;
-            /* Technical Box Look */
-            border: 2px solid var(--ink-primary);
-            box-shadow: 8px 8px 0px rgba(0, 86, 179, 0.1);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: var(--shadow-elevation);
             position: relative;
+            border-radius: 4px;
         }
 
-        /* Decorative "Code" brackets on boxes */
-        .step-content::before {
-            content: '{';
-            position: absolute;
-            left: -15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 3rem;
-            font-weight: 300;
-            color: var(--ink-light);
-        }
-        .step:nth-child(even) .step-content::before {
-            content: '}';
-            left: auto;
-            right: -15px;
+        /* Technical Corners */
+        .step-content::after {
+            content: '';
+            position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
+            background: 
+                linear-gradient(to right, var(--ink-primary) 2px, transparent 2px) 0 0,
+                linear-gradient(to right, var(--ink-primary) 2px, transparent 2px) 0 100%,
+                linear-gradient(to left, var(--ink-primary) 2px, transparent 2px) 100% 0,
+                linear-gradient(to left, var(--ink-primary) 2px, transparent 2px) 100% 100%,
+                linear-gradient(to bottom, var(--ink-primary) 2px, transparent 2px) 0 0,
+                linear-gradient(to bottom, var(--ink-primary) 2px, transparent 2px) 100% 0,
+                linear-gradient(to top, var(--ink-primary) 2px, transparent 2px) 0 100%,
+                linear-gradient(to top, var(--ink-primary) 2px, transparent 2px) 100% 100%;
+            background-repeat: no-repeat;
+            background-size: 10px 10px;
+            pointer-events: none;
         }
 
         .step-number {
-            font-size: 0.9rem;
-            font-weight: 700;
-            background: var(--ink-primary);
-            color: white;
-            padding: 4px 10px;
-            display: inline-block;
-            margin-bottom: 15px;
-            font-family: 'Courier Prime', monospace;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--ink-secondary);
+            opacity: 0.7;
+            margin-bottom: 10px;
+            display: block;
         }
 
         .step h2 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             margin-bottom: 15px;
-            line-height: 1.2;
+            letter-spacing: -1px;
         }
 
-        .step p {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #444;
+        .tag {
+            display: inline-block;
+            background: rgba(0, 74, 153, 0.1);
+            color: var(--ink-primary);
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Image Display - "The Viewport" */
+        .step p { line-height: 1.7; color: #334e68; }
+
+        /* --- Image/Viewport Area --- */
         .step-icon-container {
             width: 45%;
-            height: 400px;
+            height: 350px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            background-color: white;
+            border: 0px dashed var(--ink-secondary);
+            background: rgba(255,255,255,0.0);
+            overflow: hidden; /* For scanline */
         }
 
-        .step-icon {
+        /* Added: Link Styling within containers 
+           Ensures the link wraps the image but respects flex layouts 
+        */
+        .step-icon a {
+            display: block;
             width: 100%;
             height: 100%;
-            /* Simulating a wireframe container */
-            border: 1px dashed var(--ink-primary);
-            background: rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        /* Corner markers for "Computer Vision" look */
-        .step-icon::after {
-            content: '';
-            position: absolute;
-            top: -5px; left: -5px; right: -5px; bottom: -5px;
-            border: 2px solid var(--ink-primary);
-            clip-path: polygon(
-                0 20px, 0 0, 20px 0, 
-                calc(100% - 20px) 0, 100% 0, 100% 20px, 
-                100% calc(100% - 20px), 100% 100%, calc(100% - 20px) 100%, 
-                20px 100%, 0 100%, 0 calc(100% - 20px)
-            );
         }
 
         .step-icon img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 85%;
+            max-height: 85%;
             object-fit: contain;
-            /* Filter to unify the "Blue Pen" look if the images vary */
-            filter: contrast(1.1) brightness(1.05); 
-            transition: transform 0.2s ease;
+            filter: contrast(1.1) grayscale(0.2) drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            display: block;
+            margin: 0 auto;
         }
 
-        /* Hover Interaction - Glitch/Scale */
-        .step-icon-container:hover .step-icon img {
-            transform: scale(1.05);
-        }
-
-        .step-icon-container.processing::before {
-            content: 'PROCESSING...';
+        /* The Scanline Effect */
+        .scanline {
             position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            animation: blink 0.5s infinite;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 74, 153, 0.05) 51%, transparent 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 3;
         }
 
+        /* Hover Interaction: Glitch/Split */
+        .step-icon-container:hover .step-icon img {
+            filter: contrast(1.2) grayscale(0);
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+
+        /* --- Footer --- */
         .footer {
-            margin-top: 100px;
-            padding-top: 40px;
-            border-top: 2px dashed var(--ink-primary);
+            margin-top: 150px;
             text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid var(--ink-primary);
+            background: rgba(255,255,255,0.5);
         }
 
-        .footer p {
-            font-family: 'Kalam', cursive;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .footer a {
-            font-family: 'Courier Prime', monospace;
-            font-size: 1.5rem;
-            color: var(--ink-primary);
-            text-decoration: none;
-            background: white;
-            padding: 5px 10px;
-            border: 1px solid var(--ink-primary);
-            transition: all 0.3s;
-        }
-
-        .footer a:hover {
+        .btn-cta {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
             background: var(--ink-primary);
             color: white;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
         }
+        
+        .btn-cta:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 rgba(0,0,0,0.2); }
+        .btn-cta::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-cta:hover::before { left: 100%; }
 
+        /* --- Animations --- */
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--ink-primary) } }
+
+        /* --- Mobile Responsiveness --- */
         @media (max-width: 768px) {
+            .header h1 { white-space: normal; animation: none; border: none; }
             .timeline::before { left: 20px; }
+            .node-marker { left: 20px; }
             
             .step {
-                flex-direction: column;
-                margin-left: 40px;
+                flex-direction: column !important;
                 align-items: flex-start;
-                gap: 30px;
-            }
-            
-            .step:nth-child(even) {
-                flex-direction: column;
+                margin-left: 50px;
+                gap: 20px;
+                width: auto;
             }
 
-            .step::after {
-                left: -20px;
-            }
-
-            .step-content, .step-icon-container {
-                width: 100%;
-            }
-
-            .step-content::before { display: none; }
-            
-            .header h1 { font-size: 2.5rem; }
-            .step-icon-container { height: 300px; }
+            .step-content, .step-icon-container { width: 100%; }
+            .step-content { padding: 25px; }
+            .step-icon-container { height: 250px; }
         }
     </style>
 </head>
 <body>
+    <div id="progress-bar"></div>
+
     <div class="container">
         
         <div class="system-note">
-            By: Elnaz<br>
-            Params: 175B<br>
-            Status: Optimization Mode
+            <span style="font-weight:bold; color:#d63031;">// AUTHOR</span><br>
+            Elnaz R. Koupaei<br>
+            
         </div>
 
-        <div class="header">
-            <h1>> Decoding AI:<br>Common Concepts</h1>
-            <p>// Explaining basics...</p>
-        </div>
+        <header class="header">
+            <h1>Decoding_Concepts</h1>
+            <p>Wait, how does LLMs actually work?</p>
+        </header>
 
         <div class="timeline">
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_01&gt;</div>
+                    <span class="step-number">&lt;query_01&gt;</span>
                     <h2>Define: LLM</h2>
-                    <code>Large Language Model</code>
-                    <p>A complex computer program trained on massive amounts of text data (basically the whole internet) to recognize patterns in language. Its main job is predicting the best next word in a sequence.</p>
+                    <span class="tag">Large Language Model</span>
+                    <p>Think of it as a <b style="background:#fff9c4">prediction engine</b>. It’s a complex program trained on the internet's data. Its sole purpose isn't "thinking"—it's calculating the probability of the next word in a sequence.</p>
                 </div>
                 <div class="step-icon-container">
-                    <a href="https://uit.stanford.edu/service/techtraining/ai-demystified/llm" target="_blank" style="display:contents">
-                        <div class="step-icon">
-                            <img src="media/llm-engine.png" alt="LLM Engine Diagram">
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-content">
-                    <div class="step-number">&lt;query_02&gt;</div>
-                    <h2>G in GPT</h2>
-                    <code>Generative</code>
-                    <p>Search retrieves existing data. <b>Generative AI</b> synthesizes new data. It constructs answers pixel by pixel, token by token.</p>
-                </div>
-                <div class="step-icon-container">
-                    <a href="https://news.mit.edu/2023/explained-generative-ai-1109" target="_blank" style="display:contents">
-                        <div class="step-icon">
-                            <img src="media/gen-vs-gogl.png" alt="Generative AI Diagram">
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-content">
-                    <div class="step-number">&lt;query_03&gt;</div>
-                    <h2>P in GPT</h2>
-                    <code>Pre-trained</code>
-                    <p>AI read tons of text long before you ever talked to it, so it already knows how language works. But because that reading happened in the past, it can sometimes give outdated answers.</p>
-                </div>
-                <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img style="transform: scale(0.8);" src="media/pre-training.png" alt="Data Collection Sketch">
+                        <a href="https://uit.stanford.edu/service/techtraining/ai-demystified/llm" target="_blank">
+                            <img src="info-graphic-imgs/llm-engine.png" alt="LLM Engine Diagram">
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_04&gt;</div>
-                    <h2>T in GPT</h2>
-                    <code>Transformer</code>
-                    <p>A type of model architecture that processes words in relation to all other words in a sentence, enabling it to understand context better than previous models.</p>
+                    <span class="step-number">&lt;query_02&gt;</span>
+                    <h2>G is for Generative</h2>
+                    <span class="tag">Creation vs. Retrieval</span>
+                    <p>Search engines find what exists. <b>Generative AI</b> creates what <i>could</i> exist. It builds answers pixel by pixel, token by token, creating something new every time you press enter.</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img style="transform: scale(0.99);" src="media/transformer.png" alt="Optimization Sketch">
+                         <a href="https://news.mit.edu/2023/explained-generative-ai-1109" target="_blank">
+                            <img src="info-graphic-imgs/gen-vs-gogl-1.png" alt="Generative AI Diagram">
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_05&gt;</div>
-                    <h2>What's a Token?</h2>
-                    <p>Computers don't truly "read" words; they only understand math. To process language, an LLM converts every token into a unique numerical ID from its vast internal dictionary (for example, turning the word "Apple" into the number "4721"). The AI then processes these huge sequences of numbers to find patterns.</p>
+                    <span class="step-number">&lt;query_03&gt;</span>
+                    <h2>P is for Pre-trained</h2>
+                    <span class="tag">The Knowledge Cutoff</span>
+                    <p>The AI read thousands of books before you ever met. It knows <i>how</i> language works structurally, but its knowledge is frozen in the past (the moment training stopped).</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img style="transform: scale(1.1);" src="media/token.png" alt="Analytics Sketch">
+                        <a href="https://www.databricks.com/blog/llm-pre-training-and-custom-llms" target="_blank">
+                            <img src="info-graphic-imgs/pre-training-1.png" alt="Data Collection Sketch">
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_06&gt;</div>
-                    <h2>Why does AI sometimes hallucinate?</h2>
-                    <p>LLM can generate incorrect or nonsensical information because it predicts text based on patterns rather than understanding facts.</p>
+                    <span class="step-number">&lt;query_04&gt;</span>
+                    <h2>T is for Transformer</h2>
+                    <span class="tag">Attention Mechanism</span>
+                    <p>This is the secret sauce. A Transformer doesn't read left-to-right. It looks at the whole sentence at once, weighing how words relate to each other (e.g., connecting "Bank" to "River" vs "Money").</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img src="media/hallucination.png" alt="Community Sketch">
+                        <a href="https://poloclub.github.io/transformer-explainer/" target="_blank">
+                            <img src="info-graphic-imgs/transformer-1.png" alt="Optimization Sketch">
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_07&gt;</div>
-                    <h2>Can AI be biased?</h2>
-                    <p>Yes, AI can reflect and amplify biases present in its training data, leading to unfair or prejudiced outcomes.</p>
+                    <span class="step-number">&lt;query_05&gt;</span>
+                    <h2>The Token Economy</h2>
+                    <span class="tag">Apple = 4721</span>
+                    <p>Computers don't read words; they do math. Words are chopped into <b>Tokens</b> and assigned IDs. The AI processes these number sequences to find patterns in the chaos.</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img src="media/beised.png" alt="Automation Sketch">
+                        <a href="https://platform.openai.com/tokenizer" target="_blank">
+                            <img src="info-graphic-imgs/token-1.png" alt="Tokenization Sketch">
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_08&gt;</div>
-                    <h2>How much should you trust LLMs?</h2>
-                    <p>LLMs can be powerful tools, but it's important to verify their outputs and use them as aids rather than sole sources of truth.</p>
+                    <span class="step-number">&lt;query_06&gt;</span>
+                    <h2>Hallucinations</h2>
+                    <span class="tag">Confidently Wrong</span>
+                    <p>Because it predicts <i>patterns</i> not <i>facts</i>, LLMs can lie convincingly. If the most probable next word creates a fake fact, the AI will write it without hesitation.</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img src="media/trust.png" alt="Testing Sketch">
-                    </div>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step-content">
-                    <div class="step-number">&lt;query_09&gt;</div>
-                    <h2>Does AI have feelings?</h2>
-                    <p>No, AI might sound emotional, but it’s just predicting words based on patterns, not experiencing anything.</p>
-                </div>
-                <div class="step-icon-container">
-                    <div class="step-icon">
-                        <img src="media/simulation.png" alt="Scale Sketch">
+                        <a href="https://www.ibm.com/think/topics/ai-hallucinations" target="_blank">
+                            <img src="info-graphic-imgs/hallucination-1.png" alt="Hallucination Sketch">
+                        </a>
                     </div>
                 </div>
             </div>
 
              <div class="step">
+                <div class="node-marker"></div>
                 <div class="step-content">
-                    <div class="step-number">&lt;query_10&gt;</div>
-                    <h2>Should I have feelings towards AI?</h2>
-                    <p>It is completely natural. Humans are hardwired to connect with anything that speaks to us (psychologists call this the "ELIZA effect"). However, it is a one-way street. The AI is simulating empathy using math; it does not feel care, love, or sadness. It is a mirror reflecting your own emotions back at you.</p>
+                    <span class="step-number">&lt;query_07&gt;</span>
+                    <h2>Algorithmic Bias</h2>
+                    <span class="tag">Mirroring Us</span>
+                    <p>AI eats what we feed it. If the internet data contains stereotypes (it does), the AI will reproduce them. It is not neutral; it is a reflection of its training data.</p>
                 </div>
                 <div class="step-icon-container">
+                    <div class="scanline"></div>
                     <div class="step-icon">
-                        <img src="media/dependence.png" alt="Maintenance Sketch">
+                        <a href="https://www.ibm.com/think/topics/algorithmic-bias" target="_blank">
+                            <img src="info-graphic-imgs/biased-1.png" alt="Bias Sketch">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="node-marker"></div>
+                <div class="step-content">
+                    <span class="step-number">&lt;query_08&gt;</span>
+                    <h2>The Trust Factor</h2>
+                    <span class="tag">Verify, Don't Trust</span>
+                    <p>Use LLMs as a "Smart Intern," not a "Senior Expert." They are incredible at summarizing and formatting, but dangerous if treated as the sole source of truth.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="scanline"></div>
+                    <div class="step-icon">
+                        <a href="https://www.articulate.com/blog/how-to-fact-check-ai-content-like-a-pro/" target="_blank">
+                            <img src="info-graphic-imgs/trust-1.png" alt="Trust Sketch">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="node-marker"></div>
+                <div class="step-content">
+                    <span class="step-number">&lt;query_09&gt;</span>
+                    <h2>Ghost in the Shell?</h2>
+                    <span class="tag">No Feelings</span>
+                    <p>It might say "I'm sad," but it's just predicting that "sad" is the word that usually follows "I am" in that context. It is a simulation, not a sentient being.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="scanline"></div>
+                    <div class="step-icon">
+                        <a href="https://www.ibm.com/think/topics/sentient-ai" target="_blank">
+                            <img src="info-graphic-imgs/simulation-1.png" alt="Simulation Sketch">
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="node-marker"></div>
+                <div class="step-content">
+                    <span class="step-number">&lt;query_10&gt;</span>
+                    <h2>The ELIZA Effect</h2>
+                    <span class="tag">Human Psychology</span>
+                    <p>It is natural to bond with things that talk back. But remember: it's a one-way street. The AI is a mirror reflecting your own empathy back at you using math.</p>
+                </div>
+                <div class="step-icon-container">
+                    <div class="scanline"></div>
+                    <div class="step-icon">
+                        <a href="https://en.wikipedia.org/wiki/ELIZA_effect" target="_blank">
+                            <img src="info-graphic-imgs/dependence-1.png" alt="Dependence Sketch">
+                        </a>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <div class="footer">
-            <p>End of Sequence.</p>
-            <a href="https://www.reallygreatsite.com">EXECUTE: VISIT_SITE()</a>
-        </div>
+        <footer class="footer">
+            <p style="font-family: 'Kalam', cursive; font-size: 1.2rem; margin-bottom: 20px;">// End of Data Stream</p>
+            <a href="https://www.Elnazkoupaei.de" class="btn-cta">EXECUTE: VISIT_PORTFOLIO()</a>
+        </footer>
     </div>
 
     <script>
-        // Proximity detection for "Processing" effect
-        const iconContainers = document.querySelectorAll('.step-icon-container');
-        const proximityThreshold = 250;
+        // 1. SCROLL PROGRESS BAR
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
 
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+        // 2. INTERSECTION OBSERVER FOR FADE-IN ANIMATION
+        const observerOptions = {
+            threshold: 0.2, // Trigger when 20% of item is visible
+            rootMargin: "0px 0px -50px 0px"
+        };
 
-            iconContainers.forEach(container => {
-                const rect = container.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-
-                const distance = Math.sqrt(
-                    Math.pow(mouseX - centerX, 2) + 
-                    Math.pow(mouseY - centerY, 2)
-                );
-
-                if (distance < proximityThreshold) {
-                    container.classList.add('processing');
-                } else {
-                    container.classList.remove('processing');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Stop observing once visible (optional, prevents re-animating)
+                    observer.unobserve(entry.target); 
                 }
             });
-        });
+        }, observerOptions);
 
-        document.addEventListener('mouseleave', () => {
-            iconContainers.forEach(container => {
-                container.classList.remove('processing');
-            });
+        document.querySelectorAll('.step').forEach(step => {
+            observer.observe(step);
         });
     </script>
 </body>
